@@ -12,11 +12,11 @@
 
         <form action="{{ url_for("setvals")}}" method="POST" enctype="multipart/form-data">
 
-          {{ im.input(label="Phrase File", type="file", id="phrase_file", name="phrase_file") }}
+          {{ im.input(label="Phrase File (.txt)", type="file", id="phrase_file", name="phrase_file" ) }}
 
           {{ im.input(label="Mix?", type="checkbox", id="to_mix", name="to_mix") }}
 
-          {{ im.input(label="Mix Sound File", type="file", id="sound_file", name="sound_file") }}
+          {{ im.input(label="Mix Sound File (.wav)", type="file", id="sound_file", name="sound_file") }}
 
           {{ im.input(label="Attenuation", type="number", id="attenuation", name="attenuation", placeholder="Enter attenuation (dB)") }}
 
@@ -32,4 +32,3 @@
 
 
 {% endblock %}
-
