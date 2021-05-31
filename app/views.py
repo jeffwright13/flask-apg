@@ -2,6 +2,7 @@ from flask import render_template, request, jsonify
 from datetime import datetime
 from app import app
 
+import app.apg as apg
 
 
 import sys
@@ -18,6 +19,7 @@ def setvals():
         sound_file = request.form.get("sound_file")
         attenuation = request.form.get("attenuation")
 
+        '''
         return jsonify(
             {
                 "phrase_file": phrase_file,  # "test.txt"
@@ -26,9 +28,9 @@ def setvals():
                 "attenuation": attenuation,  # "33"
             }
         )
+        '''
 
-
-        #return run_apg()
+        return run_apg()
     else:
         return render_template("public/setvals.html")
 
@@ -39,8 +41,8 @@ def run_apg():
     sound_file = request.args.get("sound_file", None)
     attenuation = request.args.get("attenuation", 0)
 
-    '''
-    A = Apg(phrase_file, to_mix, sound_file, attenuation)
+
+    A = apg.Apg(phrase_file, to_mix, sound_file, attenuation)
     A.gen_speech()
 
     if A.to_mix == True:
@@ -59,16 +61,11 @@ def run_apg():
             "attenuation": A.attenuation,
         }
     )
-    '''
-    return jsonify(
-        {
-            "phrase_file": phrase_file,
-            "to_mix": to_mix,
-            "sound_file": sound_file,
-            "attenuation": attenuation,
-        }
-    )
 
+
+# http://127.0.0.1:5000/run_apg?phrase_file=%2FUsers%2Fjeff%2Fcoding%2Fapp%2Fapp%2Ffiles%2Ftest.txt
+
+# http://127.0.0.1:5000/run_apg?to_mix=True&attenuation=10&sound_file=%2FUsers%2Fjeff%2Fcoding%2Fapp%2Fapp%2Ffiles%2Fbirds.wav&phrase_file=%2FUsers%2Fjeff%2Fcoding%2Fapp%2Fapp%2Ffiles%2Ftest.txt
 
 
 @app.template_filter("clean_date")
