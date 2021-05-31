@@ -1,0 +1,37 @@
+{% extends "public/templates/public_template.html" %}
+{% import "macros/input_macros.html" as im %}
+
+{% block title %}Setvals{% endblock %}
+{% block main %}
+
+
+<div class="container">
+  <div class="row">
+    <div class="col">
+      <h1>apg input parameter settings</h1>
+
+
+
+        <form action="{{ url_for("setvals")}}" method="POST">
+
+          {{ im.input(label="Phrase File", type="file", id="phrase_file", name="phrase_file") }}
+
+          {{ im.input(label="Mix?", type="checkbox", id="to_mix", name="to_mix") }}
+
+          {{ im.input(label="Mix Sound File", type="file", id="sound_file", name="sound_file") }}
+
+          {{ im.input(label="Attenuation", type="number", id="attenuation", name="attenuation", placeholder="Enter attenuation (dB)") }}
+
+          <button type="submit">Submit</button>
+
+        </form>
+
+
+
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}
+
