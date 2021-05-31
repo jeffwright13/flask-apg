@@ -7,7 +7,6 @@ import math
 from pathlib import Path
 from gtts import gTTS
 from pydub import AudioSegment
-import os
 
 
 class Apg:

@@ -11,28 +11,19 @@ from pathlib import Path
 from gtts import gTTS
 from pydub import AudioSegment
 
+
 @app.route("/setvals", methods=("GET", "POST"))
 def setvals():
-    if request.method == 'POST':
+    if request.method == "POST":
         phrase_file = request.form.get("phrase_file")
         to_mix = request.form.get("to_mix")
         sound_file = request.form.get("sound_file")
         attenuation = request.form.get("attenuation")
-
-        '''
-        return jsonify(
-            {
-                "phrase_file": phrase_file,  # "test.txt"
-                "to_mix": to_mix,            # "on" or null
-                "sound_file": sound_file,    # "birds.wav"
-                "attenuation": attenuation,  # "33"
-            }
-        )
-        '''
-
         return run_apg()
+
     else:
         return render_template("public/setvals.html")
+
 
 @app.route("/run_apg", methods=["GET", "POST"])
 def run_apg():
@@ -40,7 +31,6 @@ def run_apg():
     to_mix = request.args.get("to_mix", False)
     sound_file = request.args.get("sound_file", None)
     attenuation = request.args.get("attenuation", 0)
-
 
     A = apg.Apg(phrase_file, to_mix, sound_file, attenuation)
     A.gen_speech()
@@ -72,14 +62,17 @@ def run_apg():
 def clean_date(dt):
     return dt.strftime("%d %b %Y")
 
+
 @app.route("/")
 @app.route("/index")
 def index():
     return render_template("public/index.html")
 
+
 @app.route("/about")
 def about():
     return render_template("public/about.html")
+
 
 @app.route("/jinja")
 def jinja():
@@ -96,13 +89,7 @@ def jinja():
     langs = ["Python", "JavaScript", "Bash", "Ruby", "C", "Rust"]
 
     # Dictionaries
-    friends = {
-        "Tony": 43,
-        "Cody": 28,
-        "Amy": 26,
-        "Clarissa": 23,
-        "Wendell": 39
-    }
+    friends = {"Tony": 43, "Cody": 28, "Amy": 26, "Clarissa": 23, "Wendell": 39}
 
     # Tuples
     colors = ("Red", "Blue")
@@ -123,7 +110,7 @@ def jinja():
     my_remote = GitRemote(
         name="Learning Flask",
         description="Learn the Flask web framework for Python",
-        domain="https://github.com/Julian-Nash/learning-flask.git"
+        domain="https://github.com/Julian-Nash/learning-flask.git",
     )
 
     # Functions
@@ -131,7 +118,15 @@ def jinja():
         return x * qty
 
     return render_template(
-        "public/jinja.html", my_name=my_name, my_age=my_age, langs=langs,
-        friends=friends, colors=colors, cool=cool, GitRemote=GitRemote,
-        my_remote=my_remote, repeat=repeat, date=date
+        "public/jinja.html",
+        my_name=my_name,
+        my_age=my_age,
+        langs=langs,
+        friends=friends,
+        colors=colors,
+        cool=cool,
+        GitRemote=GitRemote,
+        my_remote=my_remote,
+        repeat=repeat,
+        date=date,
     )
