@@ -1,56 +1,49 @@
-from flask import render_template, request, jsonify
 from datetime import datetime
-from app import app
-
-import app.apg as apg
-
-
 import sys
 import math
 from pathlib import Path
+
+from flask import render_template, request, jsonify
 from gtts import gTTS
 from pydub import AudioSegment
+
+from app import app
+import app.apg as apg
+
 
 
 @app.route("/setvals", methods=("GET", "POST"))
 def setvals():
     if request.method == "POST":
-        phrase_file = request.form.get("phrase_file")
         to_mix = request.form.get("to_mix")
-        sound_file = request.form.get("sound_file")
         attenuation = request.form.get("attenuation")
-        return run_apg()
+
+        # https://flask.palletsprojects.com/en/1.1.x/patterns/fileuploads/
+        phrase_file = request.files['phrase_file']
+        sound_file = request.files['sound_file']
+
+        A = apg.Apg(phrase_file, to_mix, sound_file, attenuation)
+        A.gen_speech()
+
+        # TODO: abstract out into the class?
+        if A.to_mix == True:
+            bkgnd = AudioSegment.from_file(A.sound_file, format="wav")
+            A.mix_file = A.mix(A.speech_file, bkgnd, A.attenuation)
+            A.mix_file.export(A.save_file, format="mp3")
+        else:
+            A.speech_file.export(A.save_file, format="mp3")
+
+        return jsonify(
+            {
+                "phrase_file": A.phrase_file,
+                "save_file": A.save_file,
+                "to_mix": A.to_mix,
+                "sound_file": A.sound_file,
+                "attenuation": A.attenuation,
+            })
 
     else:
         return render_template("public/setvals.html")
-
-
-@app.route("/run_apg", methods=["GET", "POST"])
-def run_apg():
-    phrase_file = request.args.get("phrase_file", None)
-    to_mix = request.args.get("to_mix", False)
-    sound_file = request.args.get("sound_file", None)
-    attenuation = request.args.get("attenuation", 0)
-
-    A = apg.Apg(phrase_file, to_mix, sound_file, attenuation)
-    A.gen_speech()
-
-    if A.to_mix == True:
-        bkgnd = AudioSegment.from_file(A.sound_file, format="wav")
-        A.mix_file = A.mix(A.speech_file, bkgnd, A.attenuation)
-        A.mix_file.export(A.save_file, format="mp3")
-    else:
-        A.speech_file.export(A.save_file, format="mp3")
-
-    return jsonify(
-        {
-            "phrase_file": A.phrase_file,
-            "save_file": A.save_file,
-            "to_mix": A.to_mix,
-            "sound_file": A.sound_file,
-            "attenuation": A.attenuation,
-        }
-    )
 
 
 # http://127.0.0.1:5000/run_apg?phrase_file=%2FUsers%2Fjeff%2Fcoding%2Fapp%2Fapp%2Ffiles%2Ftest.txt
