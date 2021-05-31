@@ -1,28 +1,58 @@
-from datetime import datetime
+import os
 import sys
 import math
+from datetime import datetime
 from pathlib import Path
 
 from flask import render_template, request, jsonify
-from gtts import gTTS
+from werkzeug.utils import secure_filename
+
 from pydub import AudioSegment
 
 from app import app
 import app.apg as apg
 
 
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in app.config["ALLOWED_EXTENSIONS"]
+
 
 @app.route("/setvals", methods=("GET", "POST"))
 def setvals():
-    if request.method == "POST":
-        to_mix = request.form.get("to_mix")
-        attenuation = request.form.get("attenuation")
+    # All requests other than POST (i.e. GET) are shown the input form.
+    # Data from the form's 'submit' button result in a POST, and will be
+    # processed by the audio_program_generator (apg) code.
 
-        # https://flask.palletsprojects.com/en/1.1.x/patterns/fileuploads/
+    if not request.method == "POST":
+        return render_template("public/setvals.html")
+    else:
+        to_mix = True if request.form.get("to_mix") == "on" else False
+
+        # Verify phrase_file type is allowed; if not, redirect to form page.
         phrase_file = request.files['phrase_file']
-        sound_file = request.files['sound_file']
+        if not allowed_file(phrase_file.filename):
+            return render_template("public/setvals.html")
+        else:
+            Path(app.config['UPLOAD_FOLDER']).mkdir(parents=True, exist_ok=True)
+            savefile = secure_filename(phrase_file.filename)
+            phrase_file.save(os.path.join(app.config['UPLOAD_FOLDER'], savefile))  # CONVERT ME TO PATHLIB!
 
-        A = apg.Apg(phrase_file, to_mix, sound_file, attenuation)
+        if to_mix:
+            # breakpoint()
+            attenuation = int(request.form.get("attenuation"))
+            sound_file = request.files['sound_file']
+            if not allowed_file(sound_file.filename):
+                return render_template("public/setvals.html")
+            else:
+                savefile = secure_filename(sound_file.filename)
+                sound_file.save(os.path.join(app.config['UPLOAD_FOLDER'], savefile))
+
+        if to_mix:
+            A = apg.Apg(phrase_file, to_mix, sound_file, attenuation)
+        else:
+            A = apg.Apg(phrase_file)
+
         A.gen_speech()
 
         # TODO: abstract out into the class?
@@ -42,84 +72,3 @@ def setvals():
                 "attenuation": A.attenuation,
             })
 
-    else:
-        return render_template("public/setvals.html")
-
-
-# http://127.0.0.1:5000/run_apg?phrase_file=%2FUsers%2Fjeff%2Fcoding%2Fapp%2Fapp%2Ffiles%2Ftest.txt
-
-# http://127.0.0.1:5000/run_apg?to_mix=True&attenuation=10&sound_file=%2FUsers%2Fjeff%2Fcoding%2Fapp%2Fapp%2Ffiles%2Fbirds.wav&phrase_file=%2FUsers%2Fjeff%2Fcoding%2Fapp%2Fapp%2Ffiles%2Ftest.txt
-
-
-@app.template_filter("clean_date")
-def clean_date(dt):
-    return dt.strftime("%d %b %Y")
-
-
-@app.route("/")
-@app.route("/index")
-def index():
-    return render_template("public/index.html")
-
-
-@app.route("/about")
-def about():
-    return render_template("public/about.html")
-
-
-@app.route("/jinja")
-def jinja():
-
-    date = datetime.utcnow()
-
-    # Strings
-    my_name = "Julian"
-
-    # Integers
-    my_age = 30
-
-    # Lists
-    langs = ["Python", "JavaScript", "Bash", "Ruby", "C", "Rust"]
-
-    # Dictionaries
-    friends = {"Tony": 43, "Cody": 28, "Amy": 26, "Clarissa": 23, "Wendell": 39}
-
-    # Tuples
-    colors = ("Red", "Blue")
-
-    # Booleans
-    cool = True
-
-    # Classes
-    class GitRemote:
-        def __init__(self, name, description, domain):
-            self.name = name
-            self.description = description
-            self.domain = domain
-
-        def clone(self, repo):
-            return f"Cloning into {repo}"
-
-    my_remote = GitRemote(
-        name="Learning Flask",
-        description="Learn the Flask web framework for Python",
-        domain="https://github.com/Julian-Nash/learning-flask.git",
-    )
-
-    # Functions
-    def repeat(x, qty=1):
-        return x * qty
-
-    return render_template(
-        "public/jinja.html",
-        my_name=my_name,
-        my_age=my_age,
-        langs=langs,
-        friends=friends,
-        colors=colors,
-        cool=cool,
-        GitRemote=GitRemote,
-        my_remote=my_remote,
-        repeat=repeat,
-        date=date,
-    )
