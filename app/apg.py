@@ -10,13 +10,13 @@ from pydub import AudioSegment
 
 
 class Apg:
-    def __init__(self, phrase_file, to_mix=False, sound_file=None, attenuation=0):
-        """Initialize class"""
-        self.phrase_file = phrase_file  # Input file to generate speech segments
+    def __init__(self, phrase_file: str, to_mix: bool=False, sound_file: str="", attenuation: int=0):
+        """Initialize class instance"""
+        self.phrase_file = Path(phrase_file)  # Input file to generate speech segments
         self.speech_file = None  # Generated speech/silence
-        self.to_mix = bool(to_mix)  # Specifies if mixing will take place
         self.mix_file = None  # Mixed speeech/sound
-        self.sound_file = sound_file  # File with which to mix generated speech
+        self.to_mix = bool(to_mix)  # Specifies if mixing will take place
+        self.sound_file = Path(sound_file)  # File with which to mix generated speech
         self.attenuation = int(attenuation)  # Attenuation value, if mixing
         self.save_file = str(Path(phrase_file).parent / Path(phrase_file).stem) + ".mp3"
 
