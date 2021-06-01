@@ -1,7 +1,4 @@
 import os
-import sys
-import math
-from datetime import datetime
 from pathlib import Path
 
 from flask import render_template, request, jsonify
@@ -35,8 +32,9 @@ def setvals():
             return render_template("public/setvals.html")
         else:
             Path(app.config['UPLOAD_FOLDER']).mkdir(parents=True, exist_ok=True)
-            savefile = secure_filename(phrase_file.filename)
-            phrase_file.save(os.path.join(app.config['UPLOAD_FOLDER'], savefile))  # CONVERT ME TO PATHLIB!
+            phrase_savefile = secure_filename(phrase_file.filename)
+            phrase_file.save(os.path.join(app.config['UPLOAD_FOLDER'], phrase_savefile))  # CONVERT ME TO PATHLIB!
+            phrase_file.close()
 
         if to_mix:
             # breakpoint()
@@ -45,13 +43,14 @@ def setvals():
             if not allowed_file(sound_file.filename):
                 return render_template("public/setvals.html")
             else:
-                savefile = secure_filename(sound_file.filename)
-                sound_file.save(os.path.join(app.config['UPLOAD_FOLDER'], savefile))
+                sound_savefile = secure_filename(sound_file.filename)
+                sound_file.save(os.path.join(app.config['UPLOAD_FOLDER'], sound_savefile))
+                sound_file.close()
 
         if to_mix:
-            A = apg.Apg(phrase_file, to_mix, sound_file, attenuation)
+            A = apg.Apg(os.path.join(app.config['UPLOAD_FOLDER'], phrase_savefile), to_mix, os.path.join(app.config['UPLOAD_FOLDER'], sound_savefile), attenuation)
         else:
-            A = apg.Apg(phrase_file)
+            A = apg.Apg(os.path.join(app.config['UPLOAD_FOLDER'], phrase_savefile))
 
         A.gen_speech()
 
@@ -63,12 +62,5 @@ def setvals():
         else:
             A.speech_file.export(A.save_file, format="mp3")
 
-        return jsonify(
-            {
-                "phrase_file": A.phrase_file,
-                "save_file": A.save_file,
-                "to_mix": A.to_mix,
-                "sound_file": A.sound_file,
-                "attenuation": A.attenuation,
-            })
+        return render_template("public/file_download.html")
 

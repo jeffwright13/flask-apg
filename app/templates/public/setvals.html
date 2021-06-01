@@ -12,19 +12,17 @@
 
         <form action="{{ url_for("setvals")}}" method="POST" enctype="multipart/form-data">
 
-          {{ im.input(label="Phrase File (.txt)", type="file", id="phrase_file", name="phrase_file" ) }}
+          {{ im.input_required(label="Please select your input phrase file (required; type = .txt; max_size = 50MB)", type="file", id="phrase_file", name="phrase_file" ) }}
 
-          {{ im.input(label="Mix?", type="checkbox", id="to_mix", name="to_mix") }}
+          {{ im.input(label="Mix Enable", type="checkbox", id="to_mix", name="to_mix") }}
 
-          {{ im.input(label="Mix Sound File (.wav)", type="file", id="sound_file", name="sound_file") }}
+          {{ im.input(label="Please select sound file to mix in (required if mix enabled; type = .wav; max_size = 50MB)", type="file", id="sound_file", name="sound_file") }}
 
-          {{ im.input(label="Attenuation", type="number", id="attenuation", name="attenuation", placeholder="Enter attenuation (dB)") }}
+          {{ im.input(label="Attenuation", type="number", id="attenuation", name="attenuation", placeholder="Enter attenuation (dB)", value=10) }}
 
           <button type="submit">Submit</button>
 
         </form>
-
-
 
     </div>
   </div>

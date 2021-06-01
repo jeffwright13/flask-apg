@@ -1,7 +1,18 @@
-{% macro input(label="", type="text", id="", name="", placeholder="") -%}
+{% macro input(label="", type="text", id="", name="", placeholder="", value="") -%}
+
   <div class="form-group">
     <label>{{ label }}</label>
-    <input type="{{ type }}" class="form-control" id="{{ id }}" name="{{ name }}" placeholder="{{ placeholder }}">
+    <input type="{{ type }}" class="form-control" id="{{ id }}" name="{{ name }}" placeholder="{{ placeholder }}" value="{{ value }}">
   </div>
+
 {%- endmacro %}
 
+
+{% macro input_required(label="", type="text", id="", name="", placeholder="", value="") -%}
+
+  <div class="form-group">
+    <label>{{ label }}</label>
+    <input type="{{ type }}" class="form-control" id="{{ id }}" name="{{ name }}" placeholder="{{ placeholder }}" value="{{ value }}" required>
+  </div>
+
+{%- endmacro %}

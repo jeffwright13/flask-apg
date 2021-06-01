@@ -1,0 +1,22 @@
+{% extends "public/templates/public_template.html" %}
+{% import "macros/input_macros.html" as im %}
+
+{% block title %}File Download{% endblock %}
+{% block main %}
+
+<div class="container">
+  <div class="row">
+    <div class="col">
+      <h1>resultant file download</h1>
+
+        <form method="get" action="file.doc">
+           <button type="submit">Download!</button>
+        </form>
+
+        <a href="path_to_file" download="proposed_file_name">Download</a>
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}
