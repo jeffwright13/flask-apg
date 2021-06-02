@@ -92,6 +92,7 @@ class Apg:
         )
 
     def invoke(self):
+        self.gen_speech()
         if self.to_mix == True:
             bkgnd = AudioSegment.from_file(self.sound_file, format="wav")
             self.mix_file = self.mix(self.speech_file, bkgnd, self.attenuation)
