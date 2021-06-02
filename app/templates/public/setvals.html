@@ -8,7 +8,7 @@
 <div class="container">
   <div class="row">
     <div class="col">
-      <div><h1>apg input parameters</h1></div>
+      <div><h1></h1></div>
 
         <form action="{{ url_for("setvals")}}" method="POST" enctype="multipart/form-data">
 
@@ -18,7 +18,7 @@
 
           {{ im.input(label="Please select sound file to mix in (required if mix enabled; type = .wav; max_size = 50MB)", type="file", id="sound_file", name="sound_file") }}
 
-          {{ im.input(label="Attenuation", type="number", id="attenuation", name="attenuation", placeholder="Enter attenuation (dB)", value=10) }}
+          {{ im.input(label="Attenuation applied to sound file (dB)", type="number", id="attenuation", name="attenuation", placeholder="Enter attenuation (dB)", value=10) }}
 
           <button type="submit">Submit</button>
 

@@ -1,0 +1,46 @@
+{% extends "public/templates/public_template.html" %}
+
+{% block title %}Setvals{% endblock %}
+{% block main %}
+
+<div class="container">
+  <div class="row">
+    <div class="col">
+
+      <form action="/setvals" method="POST" enctype="multipart/form-data">
+
+        <div class="form-group">
+          <label>Please select your input phrase file (required; type = .txt; max_size = 50MB)</label>
+          <input type="file" class="form-control" id="phrase_file" name="phrase_file" required />
+        </div>
+
+        <div class="form-group">
+          <label class="switch">
+            Mix Enable
+            <input type="checkbox" class="form-control" id="to_mix" name="to_mix" />
+            <span class="slider round"></span>
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label>Please select sound file to mix in (required if mix enabled; type = .wav; max_size = 50MB)</label>
+          <input type="file" class="form-control" id="sound_file" name="sound_file" />
+          <span class="slider round"></span>
+        </div>
+
+        <div class="form-group">
+          <label>Attenuation applied to sound file (dB)</label>
+          <input type="number" class="form-control" id="attenuation" name="attenuation" placeholder="Enter attenuation (dB)" value="10" />
+          <span class="slider round"></span>
+        </div>
+
+        <button type="submit">Submit</button>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}
