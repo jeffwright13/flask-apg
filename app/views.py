@@ -61,6 +61,7 @@ def setvals():
                 )  # CONVERT ME TO PATHLIB!
                 sound_file.close()
 
+        # Instantiate Apg object with params passed in from HTML form
         if to_mix:
             A = apg.Apg(
                 os.path.join(app.config["FILE_FOLDER"], phrase_savefile),
@@ -73,11 +74,8 @@ def setvals():
                 os.path.join(app.config["FILE_FOLDER"], phrase_savefile)
             )  # CONVERT ME TO PATHLIB!
 
-        A.gen_speech()
+        # Generate mixed sound file from speech, and serve in browser
         A.invoke()
-
-        # Refresh page and direct broswer to save/open resultant file
-        # (see get_file endpoint directly below)
         return redirect(url_for("get_file", path=Path(A.save_file).name))
 
 
