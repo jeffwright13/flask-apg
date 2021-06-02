@@ -12,19 +12,19 @@ from pydub import AudioSegment
 class Apg:
     def __init__(
         self,
-        phrase_file: str,
+        phrase_file: Path,
         to_mix: bool = False,
-        sound_file: str = "",
+        sound_file: Path = None,
         attenuation: int = 0,
     ):
         """Initialize class instance"""
-        self.phrase_file = Path(phrase_file)  # Input file to generate speech segments
+        self.phrase_file = phrase_file  # Input file to generate speech segments
         self.speech_file = None  # Generated speech/silence
         self.mix_file = None  # Mixed speeech/sound
-        self.to_mix = bool(to_mix)  # Specifies if mixing will take place
-        self.sound_file = Path(sound_file)  # File with which to mix generated speech
-        self.attenuation = int(attenuation)  # Attenuation value, if mixing
-        self.save_file = str(Path(phrase_file).parent / Path(phrase_file).stem) + ".mp3"
+        self.to_mix = to_mix  # Specifies if mixing will take place
+        self.sound_file = sound_file  # File with which to mix generated speech
+        self.attenuation = attenuation  # Attenuation value, if mixing
+        self.save_file = str(phrase_file.parent / phrase_file.stem) + ".mp3"
 
     def gen_speech(self):
         """Generate a combined speech file, made up of gTTS-generated speech
@@ -49,7 +49,7 @@ class Apg:
                 if len(phrase) == 0:
                     print("Error: gTTS requires non-empty text to process.")
                     print("File: ", self.phrase_file)
-                    print("Line number: ", num_rows)
+                    print("Line: ", line)
                     sys.exit()
 
                 # Each speech snippet generated from gTTS is saved locally
