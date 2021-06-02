@@ -26,12 +26,12 @@ def allowed_file(filename):
 
 @app.route("/setvals", methods=("GET", "POST"))
 def setvals():
-    # All requests other than POST (i.e. GET) are shown the input form.
-    # Data from the form's 'submit' button result in a POST, and will be
+    # All requests other than POST (i.e. GET) are re-shown the input form.
+    # Data from the form's 'submit' button results in a POST, and will be
     # processed by the audio_program_generator (apg) code.
 
     if not request.method == "POST":
-        return render_template("public/setvals.html")
+        return render_template("public/setvals2.html")
     else:
         to_mix = True if request.form.get("to_mix") == "on" else False
 
@@ -48,7 +48,6 @@ def setvals():
             phrase_file.close()
 
         if to_mix:
-            # breakpoint()
             attenuation = int(request.form.get("attenuation"))
             sound_file = request.files["sound_file"]
             if not allowed_file(sound_file.filename):
@@ -77,13 +76,11 @@ def setvals():
             A.mix_file.export(A.save_file, format="mp3")
         else:
             A.speech_file.export(A.save_file, format="mp3")
-
-        # return render_template("public/download_file.html", filename=A.save_file)
+        #breakpoint()
         return redirect(url_for("get_file", path=Path(A.save_file).name))
 
 
 @app.route("/get_file/<path:path>")
 def get_file(path):
     """Download a file."""
-    app.logger.debug("path: ", path)
     return send_from_directory(app.config["FILE_FOLDER"], path, as_attachment=True)
