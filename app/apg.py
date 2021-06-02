@@ -90,3 +90,11 @@ class Apg:
         return (segment1).overlay(
             (segment2_normalized - float(seg2_atten)).fade_in(fadein).fade_out(fadeout)
         )
+
+    def invoke(self):
+        if self.to_mix == True:
+            bkgnd = AudioSegment.from_file(self.sound_file, format="wav")
+            self.mix_file = self.mix(self.speech_file, bkgnd, self.attenuation)
+            self.mix_file.export(self.save_file, format="mp3")
+        else:
+            self.speech_file.export(self.save_file, format="mp3")
