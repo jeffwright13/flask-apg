@@ -14,4 +14,4 @@ from app import views
 from app import admin_views
 
 import logging
-logging.basicConfig(filename='flask.log', level=logging.DEBUG, format=f'%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
+logging.basicConfig(filename='flask.log', level=logging.WARN, format=f'%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
