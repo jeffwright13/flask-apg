@@ -41,8 +41,8 @@ def setvals():
 
     # Set fullpath local var to send to apg instance
     phrase_file = (
-        Path(app.config["FILE_FOLDER"]) / Path(request.files["phrase_file"].filename)
-        if request.files["phrase_file"].filename != ""
+        Path(app.config["FILE_FOLDER"]) / Path(req_phrase_file_obj.filename)
+        if req_phrase_file_obj.filename != ""
         else None
     )
 
@@ -59,20 +59,20 @@ def setvals():
 
         # Set fullpath local var to send to apg instance
         sound_file = (
-            Path(app.config["FILE_FOLDER"]) / Path(request.files["sound_file"].filename)
-            if request.files["sound_file"].filename != ""
+            Path(app.config["FILE_FOLDER"]) / Path(req_sound_file_obj.filename)
+            if req_sound_file_obj.filename != ""
             else None
         )
 
         # Verify sound_file type is allowed; if not, redirect to input form.
         if (
-            Path(request.files["sound_file"].filename).suffix
+            Path(req_sound_file_obj.filename).suffix
             not in app.config["SOUNDFILE_EXTENSIONS"]
         ):
             return render_template("public/setvals.html")
 
         # Save the sound file (if non-null) to local file-upload dir
-        req_sound_file_obj = request.files["sound_file"]
+        req_sound_file_obj = req_sound_file_obj
         if req_sound_file_obj.filename != "":
             req_sound_file_obj.save(
                 Path(app.config["FILE_FOLDER"])
