@@ -51,11 +51,8 @@ def setvals():
 
     # Set rest of parameters if 'mix' option was selected
     if to_mix:
-        attenuation = (
-            int(request.form.get("attenuation"))
-            if request.form.get("attenuation")
-            else 0
-        )
+        attenuation = request.form.get("attenuation")
+        attenuation = int(attenuation) if attenuation else 0
 
         # Set fullpath local var to send to apg instance
         sound_file = (
