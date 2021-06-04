@@ -10,7 +10,7 @@ from flask import (
 from werkzeug.utils import secure_filename
 
 from app import app
-import app.apg as apg
+import audio_program_generator.apg as apg
 
 
 @app.route("/setvals", methods=("GET", "POST"))
