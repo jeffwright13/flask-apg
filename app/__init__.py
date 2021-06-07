@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 import os
 
 from flask import Flask
@@ -8,13 +9,22 @@ from app import views, admin_views
 
 load_dotenv()
 
-ALLOWED_EXTENSIONS = {"txt", "wav"}  # txt for phrase_file, wav for mix file
-MAX_CONTENT_LENGTH = 50 * 1024 * 1024  # max file upload file size ~ 50MB
-
 app = Flask(__name__)
 
-app.config["FILE_FOLDER"] = os.getenv("APG_FILE_FOLDER")
-app.config["ALLOWED_EXTENSIONS"] = ALLOWED_EXTENSIONS
-app.config["MAX_CONTENT_LENGTH"] = MAX_CONTENT_LENGTH
+app.config["ALLOWED_EXTENSIONS"] = {"txt", "wav"}
+app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024
+app.config["PHRASEFILE_EXTENSIONS"] = {".txt"}
+app.config["SOUNDFILE_EXTENSIONS"] = {".wav"}
 
-logging.basicConfig(filename='flask.log', level=logging.WARN, format=f'%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
+# TODO: remove this when the memory solution works
+app.config["FILE_FOLDER"] = os.getenv("APG_FILE_FOLDER")
+try:
+    Path(app.config["FILE_FOLDER"]).mkdir(parents=True, exist_ok=True)
+except OSError:
+    pass
+
+logging.basicConfig(
+    filename="flask.log",
+    level=logging.WARN,
+    format=f"%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s",
+)
