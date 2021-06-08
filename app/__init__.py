@@ -5,13 +5,15 @@ import os
 from flask import Flask
 from dotenv import load_dotenv
 
-from app import views, admin_views
+# breakpoint()
+
 
 load_dotenv()
 
 app = Flask(__name__)
 
-app.config["ALLOWED_EXTENSIONS"] = {"txt", "wav"}
+from app import views, admin_views
+
 app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024
 app.config["PHRASEFILE_EXTENSIONS"] = {".txt"}
 app.config["SOUNDFILE_EXTENSIONS"] = {".wav"}
