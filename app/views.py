@@ -77,16 +77,16 @@ def setvals():
             )
             req_sound_file_obj.close()
 
-    # Instantiate Apg object with params passed in from HTML form
+    # Instantiate AudioProgramGenerator object with params passed in from HTML form
     if to_mix:
-        A = apg.Apg(
+        A = apg.AudioProgramGenerator(
             phrase_file,
             to_mix,
             sound_file,
             attenuation,
         )
     else:
-        A = apg.Apg(
+        A = apg.AudioProgramGenerator(
             phrase_file,
         )
 
