@@ -12,7 +12,7 @@ load_dotenv()
 
 app = Flask(__name__)
 
-from app import views, admin_views
+from app import views
 
 app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024
 app.config["PHRASEFILE_EXTENSIONS"] = {".txt"}
