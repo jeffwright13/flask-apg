@@ -14,6 +14,7 @@ alpha+ (meaning, it runs locally on my Macbook Pro w/ Catalina 10.15.7,
 * cd into it
 * create a virtual environment
 * pip install -r requirements.txt
+* export APG_FILE_FOLDER <path/to/local/folder/to/store/files>
 * export FLASK_APP app
 * export FLASK_ENV development
 * point browser at http://127.0.0.1:5000/setvals
