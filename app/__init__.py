@@ -1,25 +1,29 @@
-from flask import Flask
+import logging
 from pathlib import Path
+import os
 
-FILE_FOLDER = r"/Users/jeff/tmp"  # local folder to store uploaded/generated files
-PHRASEFILE_EXTENSIONS = {".txt"}  # txt for phrase_file, wav for mix file
-SOUNDFILE_EXTENSIONS = {".wav"}  # txt for phrase_file, wav for mix file
-MAX_CONTENT_LENGTH = 50 * 1024 * 1024  # max file upload file size ~ 50MB
+from flask import Flask
+from dotenv import load_dotenv
+
+# breakpoint()
+
+
+load_dotenv()
 
 app = Flask(__name__)
 
-app.config["FILE_FOLDER"] = FILE_FOLDER
-app.config["PHRASEFILE_EXTENSIONS"] = PHRASEFILE_EXTENSIONS
-app.config["SOUNDFILE_EXTENSIONS"] = SOUNDFILE_EXTENSIONS
-app.config["MAX_CONTENT_LENGTH"] = MAX_CONTENT_LENGTH
+from app import views, admin_views
 
-from app import views
-from app import admin_views
+app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024
+app.config["PHRASEFILE_EXTENSIONS"] = {".txt"}
+app.config["SOUNDFILE_EXTENSIONS"] = {".wav"}
 
-# Config app for file upload location, and create dir if needed
-Path(app.config["FILE_FOLDER"]).mkdir(parents=True, exist_ok=True)
-
-import logging
+# TODO: remove this when the memory solution works
+app.config["FILE_FOLDER"] = os.getenv("APG_FILE_FOLDER")
+try:
+    Path(app.config["FILE_FOLDER"]).mkdir(parents=True, exist_ok=True)
+except OSError:
+    pass
 
 logging.basicConfig(
     filename="flask.log",
