@@ -92,7 +92,8 @@ def setvals():
 
     # Generate mixed sound file from speech, then serve in browser
     A.invoke()
-    return redirect(url_for("get_file", path=Path(A.save_file).name))
+    # return redirect(url_for("get_file", path=Path(A.save_file).name))
+    return get_file(path=Path(A.save_file).name)
 
 
 @app.route("/get_file/<path:path>")
