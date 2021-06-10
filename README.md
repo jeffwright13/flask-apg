@@ -15,9 +15,10 @@ beta- (meaning, it runs locally on my Macbook Pro w/ Catalina 10.15.7,
 * cd into it
 * create a virtual environment
 * pip install -r requirements.txt
-* export APG_FILE_FOLDER=<path_to_local_disk_folder_to_store_files>
-* export FLASK_APP=app
-* export FLASK_ENV=development
+* vi .env
+* set your environment variables:
+    * APG_FILE_FOLDER=<path_to_local_disk_folder_to_store_files>
+    * DEBUG=[True/False]
 * flask run
 * point browser at http://127.0.0.1:5000/setvals
 * fill out the form, submit, and wait for browser to serve up your freshly mixed mp3 file :-)
