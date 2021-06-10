@@ -9,8 +9,11 @@ from flask import (
 )
 from werkzeug.utils import secure_filename
 
-from app import app
+from app import create_app
 import audio_program_generator.apg as apg
+
+
+app = create_app()
 
 
 @app.route("/setvals", methods=("GET", "POST"))
@@ -77,7 +80,8 @@ def setvals():
             )
             req_sound_file_obj.close()
 
-    # Instantiate AudioProgramGenerator object with params passed in from HTML form
+    # Instantiate AudioProgramGenerator object with params passed
+    # in from HTML form
     if to_mix:
         A = apg.AudioProgramGenerator(
             phrase_file,
@@ -98,7 +102,8 @@ def setvals():
 
 @app.route("/get_file/<path:path>")
 def get_file(path):
-    return send_from_directory(app.config["FILE_FOLDER"], path, as_attachment=True)
+    return send_from_directory(app.config["FILE_FOLDER"],
+                               path, as_attachment=True)
 
 
 def shutdown_server():
@@ -112,3 +117,13 @@ def shutdown_server():
 def shutdown():
     shutdown_server()
     return "Server shutting down..."
+
+
+@app.route("/admin/dashboard")
+def admin_dashboard():
+    return render_template("admin/dashboard.html")
+
+
+@app.route("/admin/profile")
+def admin_profile():
+    return render_template("admin/profile.html")
