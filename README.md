@@ -17,6 +17,7 @@ alpha+ (meaning, it runs locally on my Macbook Pro w/ Catalina 10.15.7,
 * export APG_FILE_FOLDER=<path_to_local_dick_to_store_files>
 * export FLASK_APP=app
 * export FLASK_ENV=development
+* flask run
 * point browser at http://127.0.0.1:5000/setvals
 * fill out the form, submit, and wait for browser to serve up your freshly mixed mp3 file :-)
 
