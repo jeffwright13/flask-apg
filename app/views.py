@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 from flask import (
@@ -8,14 +9,16 @@ from flask import (
     url_for,
 )
 from werkzeug.utils import secure_filename
+import requests
 
 from app import app
-import audio_program_generator.apg as apg
+from .utils import encode_mp3_file, upload_to_s3
+
+AWS_GATEWAY_URL = os.getenv("AWS_GATEWAY_URL")
 
 
 @app.route("/setvals", methods=("GET", "POST"))
 def setvals():
-
     # All requests other than POST (i.e. GET) are re-shown the input form.
     if not request.method == "POST":
         return render_template("public/setvals2.html")
@@ -77,22 +80,23 @@ def setvals():
             )
             req_sound_file_obj.close()
 
-    # Instantiate AudioProgramGenerator object with params passed in from HTML form
-    if to_mix:
-        A = apg.AudioProgramGenerator(
-            phrase_file,
-            to_mix,
-            sound_file,
-            attenuation,
-        )
-    else:
-        A = apg.AudioProgramGenerator(
-            phrase_file,
-        )
+    # upload files to S3
+    phrase_file_s3_path = upload_to_s3(phrase_file)
+    sound_file_s3_path = upload_to_s3(sound_file)
 
-    # Generate mixed sound file from speech, then serve in browser
-    A.invoke()
-    return redirect(url_for("get_file", path=Path(A.save_file).name))
+    # have AWS lambda do the audio processing
+    payload = dict(
+        phrase_file=phrase_file_s3_path,
+        sound_file=sound_file_s3_path,
+        to_mix=to_mix,
+        attenuation=attenuation)
+
+    breakpoint()
+    resp = requests.post(AWS_GATEWAY_URL, json=payload).json()
+    encoded_result_mp3 = resp["result_file"]
+
+    return render_template("public/result.html",
+                           encode_mp3_file=encode_mp3_file)
 
 
 @app.route("/get_file/<path:path>")

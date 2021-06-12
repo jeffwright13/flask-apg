@@ -1,0 +1,17 @@
+{% extends "public/templates/public_template.html" %}
+{% import "macros/input_macros.html" as im %}
+
+{% block title %}Setvals{% endblock %}
+{% block main %}
+<div class="container">
+  <div class="row">
+    <!-- https://stackoverflow.com/a/58415830 -->
+    <audio controls controlsList="nodownload">
+    <source src="data:audio/wav;base64,{{encoded_result_mp3}}">
+    Your browser does not support the audio element.
+</audio>
+  </div>
+</div>
+
+
+{% endblock %}
