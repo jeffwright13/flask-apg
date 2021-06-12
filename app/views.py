@@ -28,9 +28,9 @@ def setvals():
     to_mix = request.form.get("to_mix") == "on"
 
     # Set rest of parameters if 'mix' option was selected
+    attenuation = 0
     if to_mix:
-        attenuation = request.form.get("attenuation")
-        attenuation = int(attenuation) if attenuation else 0
+        attenuation = int(request.form.get("attenuation", 0))
 
         # Verify sound_file type is allowed; if not, redirect to input form.
         if (
