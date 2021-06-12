@@ -58,6 +58,8 @@ def setvals():
 
     response = resp["statusCode"]
     exception = resp.get("exception")
+    # TODO: have the lambda function store the result file in the same or a
+    # different S3 bucket, then check this cache here first for quick retrieval
     file = resp.get("result_file")
 
     if response == 200:
