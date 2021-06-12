@@ -1,18 +1,12 @@
+import logging
 import os
 from pathlib import Path
 
-from flask import (
-    render_template,
-    request,
-    redirect,
-    send_from_directory,
-    url_for,
-)
-from werkzeug.utils import secure_filename
+from flask import render_template, request
 import requests
 
 from app import app
-from .utils import encode_mp3_file, upload_to_s3
+from .utils import upload_to_s3
 
 AWS_GATEWAY_URL = os.getenv("AWS_GATEWAY_URL")
 
@@ -34,21 +28,6 @@ def setvals():
     ):
         return render_template("public/setvals.html")
 
-    # Save the phrase file (if non-null) to local file-upload dir
-    if req_phrase_file_obj.filename != "":
-        req_phrase_file_obj.save(
-            Path(app.config["FILE_FOLDER"])
-            / Path(secure_filename(req_phrase_file_obj.filename))
-        )
-        req_phrase_file_obj.close()
-
-    # Set fullpath local var to send to apg instance
-    phrase_file = (
-        Path(app.config["FILE_FOLDER"]) / Path(req_phrase_file_obj.filename)
-        if req_phrase_file_obj.filename != ""
-        else None
-    )
-
     # Checkbox takes value "on" if enabled; null otherwise
     to_mix = True if request.form.get("to_mix") == "on" else False
 
@@ -57,13 +36,6 @@ def setvals():
         attenuation = request.form.get("attenuation")
         attenuation = int(attenuation) if attenuation else 0
 
-        # Set fullpath local var to send to apg instance
-        sound_file = (
-            Path(app.config["FILE_FOLDER"]) / Path(req_sound_file_obj.filename)
-            if req_sound_file_obj.filename != ""
-            else None
-        )
-
         # Verify sound_file type is allowed; if not, redirect to input form.
         if (
             Path(req_sound_file_obj.filename).suffix
@@ -71,18 +43,9 @@ def setvals():
         ):
             return render_template("public/setvals.html")
 
-        # Save the sound file (if non-null) to local file-upload dir
-        req_sound_file_obj = req_sound_file_obj
-        if req_sound_file_obj.filename != "":
-            req_sound_file_obj.save(
-                Path(app.config["FILE_FOLDER"])
-                / Path(secure_filename(req_sound_file_obj.filename))
-            )
-            req_sound_file_obj.close()
-
     # upload files to S3
-    phrase_file_s3_path = upload_to_s3(phrase_file)
-    sound_file_s3_path = upload_to_s3(sound_file)
+    phrase_file_s3_path = upload_to_s3(req_phrase_file_obj)
+    sound_file_s3_path = upload_to_s3(req_sound_file_obj)
 
     # have AWS lambda do the audio processing
     payload = dict(
@@ -91,17 +54,23 @@ def setvals():
         to_mix=to_mix,
         attenuation=attenuation)
 
-    breakpoint()
     resp = requests.post(AWS_GATEWAY_URL, json=payload).json()
-    encoded_result_mp3 = resp["result_file"]
 
-    return render_template("public/result.html",
-                           encode_mp3_file=encode_mp3_file)
+    response = resp["statusCode"]
+    exception = resp.get("exception")
+    file = resp.get("result_file")
 
+    if response == 200:
+        logging.debug(
+            f"AWS processed input files and generated file: {file}")
+    else:
+        logging.error(
+            (f"AWS called with payload: {payload} => "
+             f"response: {response} / exception: {exception}"))
 
-@app.route("/get_file/<path:path>")
-def get_file(path):
-    return send_from_directory(app.config["FILE_FOLDER"], path, as_attachment=True)
+    return render_template("public/setvals.html",
+                           file=file,
+                           exception=exception)
 
 
 def shutdown_server():
