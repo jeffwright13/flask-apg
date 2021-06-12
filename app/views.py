@@ -1,14 +1,10 @@
 import logging
-import os
 from pathlib import Path
 
 from flask import render_template, request
-import requests
 
 from app import app
-from .utils import upload_to_s3
-
-AWS_GATEWAY_URL = os.getenv("AWS_GATEWAY_URL")
+from .aws import create_audio_mix
 
 
 @app.route("/setvals", methods=("GET", "POST"))
@@ -29,7 +25,7 @@ def setvals():
         return render_template("public/setvals.html")
 
     # Checkbox takes value "on" if enabled; null otherwise
-    to_mix = True if request.form.get("to_mix") == "on" else False
+    to_mix = request.form.get("to_mix") == "on"
 
     # Set rest of parameters if 'mix' option was selected
     if to_mix:
@@ -43,32 +39,22 @@ def setvals():
         ):
             return render_template("public/setvals.html")
 
-    # upload files to S3
-    phrase_file_s3_path = upload_to_s3(req_phrase_file_obj)
-    sound_file_s3_path = upload_to_s3(req_sound_file_obj)
+    response = create_audio_mix(
+        req_phrase_file_obj,
+        req_sound_file_obj,
+        to_mix,
+        attenuation)
 
-    # have AWS lambda do the audio processing
-    payload = dict(
-        phrase_file=phrase_file_s3_path,
-        sound_file=sound_file_s3_path,
-        to_mix=to_mix,
-        attenuation=attenuation)
+    file = response.get("result_file")
+    exception = response.get("exception")
 
-    resp = requests.post(AWS_GATEWAY_URL, json=payload).json()
-
-    response = resp["statusCode"]
-    exception = resp.get("exception")
-    # TODO: have the lambda function store the result file in the same or a
-    # different S3 bucket, then check this cache here first for quick retrieval
-    file = resp.get("result_file")
-
-    if response == 200:
+    if response["statusCode"] == 200:
         logging.debug(
-            f"AWS processed input files and generated file: {file}")
+            f"AWS generated mix file: {file}")
     else:
         logging.error(
-            (f"AWS called with payload: {payload} => "
-             f"response: {response} / exception: {exception}"))
+            ("AWS failed to generate mix file, "
+             f"exception: {exception}"))
 
     return render_template("public/setvals.html",
                            file=file,
