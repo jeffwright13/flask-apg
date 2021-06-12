@@ -47,10 +47,18 @@ def setvals():
 
     file = response.get("result_file")
     exception = response.get("exception")
+    status_code = response.get("status_code")
+    message = response.get("message")
 
-    if response["statusCode"] == 200:
+    if status_code == 200:
         logging.debug(
             f"AWS generated mix file: {file}")
+    # sometimes lambda returns something app developer did not define,
+    # e.g. {'message': 'Endpoint request timed out'}
+    elif message:
+        logging.error(
+            ("AWS failed to generate mix file, "
+             f"message returned: {message}"))
     else:
         logging.error(
             ("AWS failed to generate mix file, "
