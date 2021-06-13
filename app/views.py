@@ -46,13 +46,6 @@ def setvals():
         attenuation = request.form.get("attenuation")
         attenuation = int(attenuation) if attenuation else 0
 
-        # Set fullpath local var to send to apg instance
-        sound_file = (
-            Path(app.config["FILE_FOLDER"]) / Path(req_sound_file_obj.filename)
-            if req_sound_file_obj.filename != ""
-            else None
-        )
-
         # Verify sound_file type is allowed; if not, redirect to input form.
         if (
             Path(req_sound_file_obj.filename).suffix
@@ -60,22 +53,14 @@ def setvals():
         ):
             return render_template("public/setvals.html")
 
-        # Save the sound file (if non-null) to local file-upload dir
-        req_sound_file_obj = req_sound_file_obj
-        if req_sound_file_obj.filename != "":
-            req_sound_file_obj.save(
-                Path(app.config["FILE_FOLDER"])
-                / Path(secure_filename(req_sound_file_obj.filename))
-            )
-            req_sound_file_obj.close()
-
     # Instantiate AudioProgramGenerator object with params passed
     # in from HTML form
     if to_mix:
+        p = StringIO(req_phrase_file_obj.read().decode())
+        s = BytesIO(req_sound_file_obj.read())
         A = apg.AudioProgramGenerator(
-            phrase_file,
-            to_mix,
-            sound_file,
+            p,
+            s,
             attenuation,
         )
     else:
