@@ -1,17 +1,20 @@
 from pathlib import Path
+from io import StringIO, BytesIO, TextIOWrapper
 
 from flask import (
     render_template,
     request,
     redirect,
+    send_file,
     send_from_directory,
     url_for,
 )
 from werkzeug.utils import secure_filename
 
 from app import create_app
-import audio_program_generator.apg as apg
 
+# import audio_program_generator.apg as apg
+import apg
 
 app = create_app()
 
@@ -33,21 +36,6 @@ def setvals():
         not in app.config["PHRASEFILE_EXTENSIONS"]
     ):
         return render_template("public/setvals.html")
-
-    # Save the phrase file (if non-null) to local file-upload dir
-    if req_phrase_file_obj.filename != "":
-        req_phrase_file_obj.save(
-            Path(app.config["FILE_FOLDER"])
-            / Path(secure_filename(req_phrase_file_obj.filename))
-        )
-        req_phrase_file_obj.close()
-
-    # Set fullpath local var to send to apg instance
-    phrase_file = (
-        Path(app.config["FILE_FOLDER"]) / Path(req_phrase_file_obj.filename)
-        if req_phrase_file_obj.filename != ""
-        else None
-    )
 
     # Checkbox takes value "on" if enabled; null otherwise
     to_mix = True if request.form.get("to_mix") == "on" else False
@@ -90,20 +78,25 @@ def setvals():
             attenuation,
         )
     else:
-        A = apg.AudioProgramGenerator(
-            phrase_file,
-        )
+        p = StringIO(req_phrase_file_obj.read().decode())
+        A = apg.AudioProgramGenerator(p)
 
     # Generate mixed sound file from speech, then serve in browser
-    A.invoke()
-    # return redirect(url_for("get_file", path=Path(A.save_file).name))
-    return get_file(path=Path(A.save_file).name)
+    result = A.invoke()
+    return send_file(
+        result,
+        mimetype="audio/mpeg",
+        attachment_filename=str(Path(req_phrase_file_obj.filename)),
+        as_attachment=True,
+    )
 
 
+"""
 @app.route("/get_file/<path:path>")
 def get_file(path):
     return send_from_directory(app.config["FILE_FOLDER"],
                                path, as_attachment=True)
+"""
 
 
 def shutdown_server():
@@ -117,13 +110,3 @@ def shutdown_server():
 def shutdown():
     shutdown_server()
     return "Server shutting down..."
-
-
-@app.route("/admin/dashboard")
-def admin_dashboard():
-    return render_template("admin/dashboard.html")
-
-
-@app.route("/admin/profile")
-def admin_profile():
-    return render_template("admin/profile.html")
