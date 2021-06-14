@@ -13,9 +13,8 @@ from werkzeug.utils import secure_filename
 
 from app import create_app
 
-#THIS IS THE ONE TO USE WHEN APG 1.6.1 IS PUSHED TO MAIN AND PYPI
-# import audio_program_generator.apg as apg
-import apg
+# import apg  ## Use when debuggging and copy apg.py to root repo dir
+import audio_program_generator.apg as apg
 
 app = create_app()
 
@@ -37,22 +36,7 @@ def setvals():
         not in app.config["PHRASEFILE_EXTENSIONS"]
     ):
         return render_template("public/setvals.html")
-    """
-    # Checkbox takes value "on" if enabled; null otherwise
-    slow = True if request.form.get("slow") == "on" else False
 
-    # Set rest of parameters if 'mix' option was selected
-    if slow:
-        attenuation = request.form.get("attenuation")
-        attenuation = int(attenuation) if attenuation else 0
-
-        # Verify sound_file type is allowed; if not, redirect to input form.
-        if (
-            Path(req_sound_file_obj.filename).suffix
-            not in app.config["SOUNDFILE_EXTENSIONS"]
-        ):
-            return render_template("public/setvals.html")
-    """
     # Instantiate AudioProgramGenerator object with params passed
     # in from HTML form
     slow = True if request.form.get("slow") == "on" else False
