@@ -10,31 +10,37 @@
       <form action="/" method="POST" enctype="multipart/form-data">
 
         <div class="form-group">
-          <label>Please select your input phrase file (required)</label>
+          <label>
+            <b>Please select your input phrase file (required)</b>
+          </label>
           <input type="file" class="form-control" id="phrase_file" name="phrase_file" accept=".txt" required />
         </div>
 
         <div class="form-group">
           <label class="switch">
-            Slow Down Speech
+            <b>Slow Down Speech</b>
             <input type="checkbox" class="form-control" id="slow" name="slow" />
             <span class="slider round"></span>
           </label>
         </div>
 
         <div class="form-group">
-          <label>Please select sound file to mix in (required if mix enabled; max_size = 50MB)</label>
+          <label>
+            <b>Please select sound file to mix in (optional; recommended max_size = 20MB)</b>
+          </label>
           <input type="file" class="form-control" id="sound_file" name="sound_file" accept=".wav" />
           <span class="slider round"></span>
         </div>
 
         <div class="form-group">
-          <label>Attenuation applied to sound file (dB)</label>
+          <label>
+            <b>Attenuation applied to sound file (dB)</b>
+          </label>
           <input type="number" class="form-control" id="attenuation" name="attenuation" placeholder="Enter attenuation (dB)" value="10" />
           <span class="slider round"></span>
         </div>
 
-        <button type="submit">Submit</button>
+        <button type="submit"><b>Submit</b></button>
 
       </form>
 
