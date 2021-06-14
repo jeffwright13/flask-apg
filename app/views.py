@@ -7,7 +7,7 @@ from app import app
 from .aws import create_audio_mix
 
 
-@app.route("/setvals", methods=("GET", "POST"))
+@app.route("/", methods=("GET", "POST"))
 def setvals():
     # All requests other than POST (i.e. GET) are re-shown the input form.
     if not request.method == "POST":
