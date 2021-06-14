@@ -17,7 +17,6 @@ beta- (meaning, it runs locally on my Macbook Pro w/ Catalina 10.15.7,
 * pip install -r requirements.txt
 * vi .env
 * set your environment variables:
-    * APG_FILE_FOLDER=<path_to_local_disk_folder_to_store_files>
     * DEBUG=[True/False]
 * flask run
 * point browser at http://127.0.0.1:5000/setvals

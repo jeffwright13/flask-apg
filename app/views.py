@@ -1,17 +1,21 @@
 from pathlib import Path
+from io import StringIO, BytesIO, TextIOWrapper
 
 from flask import (
     render_template,
     request,
     redirect,
+    send_file,
     send_from_directory,
     url_for,
 )
 from werkzeug.utils import secure_filename
 
 from app import create_app
-import audio_program_generator.apg as apg
 
+#THIS IS THE ONE TO USE WHEN APG 1.6.1 IS PUSHED TO MAIN AND PYPI
+# import audio_program_generator.apg as apg
+import apg
 
 app = create_app()
 
@@ -34,21 +38,6 @@ def setvals():
     ):
         return render_template("public/setvals.html")
 
-    # Save the phrase file (if non-null) to local file-upload dir
-    if req_phrase_file_obj.filename != "":
-        req_phrase_file_obj.save(
-            Path(app.config["FILE_FOLDER"])
-            / Path(secure_filename(req_phrase_file_obj.filename))
-        )
-        req_phrase_file_obj.close()
-
-    # Set fullpath local var to send to apg instance
-    phrase_file = (
-        Path(app.config["FILE_FOLDER"]) / Path(req_phrase_file_obj.filename)
-        if req_phrase_file_obj.filename != ""
-        else None
-    )
-
     # Checkbox takes value "on" if enabled; null otherwise
     to_mix = True if request.form.get("to_mix") == "on" else False
 
@@ -57,13 +46,6 @@ def setvals():
         attenuation = request.form.get("attenuation")
         attenuation = int(attenuation) if attenuation else 0
 
-        # Set fullpath local var to send to apg instance
-        sound_file = (
-            Path(app.config["FILE_FOLDER"]) / Path(req_sound_file_obj.filename)
-            if req_sound_file_obj.filename != ""
-            else None
-        )
-
         # Verify sound_file type is allowed; if not, redirect to input form.
         if (
             Path(req_sound_file_obj.filename).suffix
@@ -71,39 +53,36 @@ def setvals():
         ):
             return render_template("public/setvals.html")
 
-        # Save the sound file (if non-null) to local file-upload dir
-        req_sound_file_obj = req_sound_file_obj
-        if req_sound_file_obj.filename != "":
-            req_sound_file_obj.save(
-                Path(app.config["FILE_FOLDER"])
-                / Path(secure_filename(req_sound_file_obj.filename))
-            )
-            req_sound_file_obj.close()
-
     # Instantiate AudioProgramGenerator object with params passed
     # in from HTML form
     if to_mix:
+        p = StringIO(req_phrase_file_obj.read().decode())
+        s = BytesIO(req_sound_file_obj.read())
         A = apg.AudioProgramGenerator(
-            phrase_file,
-            to_mix,
-            sound_file,
+            p,
+            s,
             attenuation,
         )
     else:
-        A = apg.AudioProgramGenerator(
-            phrase_file,
-        )
+        p = StringIO(req_phrase_file_obj.read().decode())
+        A = apg.AudioProgramGenerator(p)
 
     # Generate mixed sound file from speech, then serve in browser
-    A.invoke()
-    # return redirect(url_for("get_file", path=Path(A.save_file).name))
-    return get_file(path=Path(A.save_file).name)
+    result = A.invoke()
+    return send_file(
+        result,
+        mimetype="audio/mpeg",
+        attachment_filename=str(Path(req_phrase_file_obj.filename)),
+        as_attachment=True,
+    )
 
 
+"""
 @app.route("/get_file/<path:path>")
 def get_file(path):
     return send_from_directory(app.config["FILE_FOLDER"],
                                path, as_attachment=True)
+"""
 
 
 def shutdown_server():
@@ -117,13 +96,3 @@ def shutdown_server():
 def shutdown():
     shutdown_server()
     return "Server shutting down..."
-
-
-@app.route("/admin/dashboard")
-def admin_dashboard():
-    return render_template("admin/dashboard.html")
-
-
-@app.route("/admin/profile")
-def admin_profile():
-    return render_template("admin/profile.html")
