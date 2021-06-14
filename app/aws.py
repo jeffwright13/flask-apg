@@ -41,11 +41,12 @@ def create_audio_mix(req_phrase_file_obj,
     cache here first for quick retrieval
     """
     phrase_file_s3_path = _upload_to_s3(req_phrase_file_obj)
-    sound_file_s3_path = _upload_to_s3(req_sound_file_obj)
+    payload = dict(phrase_file=phrase_file_s3_path)
 
-    payload = dict(
-        phrase_file=phrase_file_s3_path,
-        sound_file=sound_file_s3_path)
+    if req_sound_file_obj:
+        sound_file_s3_path = _upload_to_s3(req_sound_file_obj)
+        payload.update(dict(sound_file=sound_file_s3_path))
+
     payload.update(kwargs)
 
     resp = requests.post(AWS_GATEWAY_URL, json=payload)
