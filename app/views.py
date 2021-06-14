@@ -15,7 +15,7 @@ def setvals():
 
     # Local handles for request object (type: Werkzeug FileStorage)
     req_phrase_file_obj = request.files["phrase_file"]
-    req_sound_file_obj = request.files["sound_file"]
+    req_sound_file_obj = request.files.get("sound_file", None)
 
     # Verify phrase_file type is allowed; if not, redirect to input form.
     if (
@@ -24,26 +24,21 @@ def setvals():
     ):
         return render_template("public/setvals.html")
 
-    # Checkbox takes value "on" if enabled; null otherwise
-    to_mix = request.form.get("to_mix") == "on"
+    # Verify sound_file type is allowed; if not, redirect to input form.
+    if req_sound_file_obj and (
+        Path(req_sound_file_obj.filename).suffix
+        not in app.config["SOUNDFILE_EXTENSIONS"]
+    ):
+        return render_template("public/setvals.html")
 
-    # Set rest of parameters if 'mix' option was selected
-    attenuation = 0
-    if to_mix:
-        attenuation = int(request.form.get("attenuation", 0))
-
-        # Verify sound_file type is allowed; if not, redirect to input form.
-        if (
-            Path(req_sound_file_obj.filename).suffix
-            not in app.config["SOUNDFILE_EXTENSIONS"]
-        ):
-            return render_template("public/setvals.html")
+    kwargs = dict(
+        attenuation=int(request.form.get("attenuation", 0))
+    )
 
     response = create_audio_mix(
         req_phrase_file_obj,
         req_sound_file_obj,
-        to_mix,
-        attenuation)
+        **kwargs)
 
     file = response.get("result_file")
     exception = response.get("exception")

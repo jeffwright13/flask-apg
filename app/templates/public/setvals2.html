@@ -7,19 +7,11 @@
   <div class="row">
     <div class="col">
 
-      <form action="/setvals" method="POST" enctype="multipart/form-data">
+      <form action="{{ url_for("setvals")}}" method="POST" enctype="multipart/form-data">
 
         <div class="form-group">
           <label>Please select your input phrase file (required; type = .txt; max_size = 50MB)</label>
           <input type="file" class="form-control" id="phrase_file" name="phrase_file" required />
-        </div>
-
-        <div class="form-group">
-          <label class="switch">
-            Mix Enable
-            <input type="checkbox" class="form-control" id="to_mix" name="to_mix" />
-            <span class="slider round"></span>
-          </label>
         </div>
 
         <div class="form-group">

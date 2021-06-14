@@ -33,8 +33,7 @@ def _upload_to_s3(file: FileStorage, bucket=AWS_S3_BUCKET) -> str:
 
 def create_audio_mix(req_phrase_file_obj,
                      req_sound_file_obj,
-                     to_mix,
-                     attenuation):
+                     **kwargs):
     """Upload files to S3 and invoke apg in AWS Lambda
 
     TODO: have the lambda function store the result file in
@@ -46,9 +45,8 @@ def create_audio_mix(req_phrase_file_obj,
 
     payload = dict(
         phrase_file=phrase_file_s3_path,
-        sound_file=sound_file_s3_path,
-        to_mix=to_mix,
-        attenuation=attenuation)
+        sound_file=sound_file_s3_path)
+    payload.update(kwargs)
 
     resp = requests.post(AWS_GATEWAY_URL, json=payload)
     return resp.json()
