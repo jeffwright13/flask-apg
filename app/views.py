@@ -1,34 +1,23 @@
+import logging
 from pathlib import Path
-from io import StringIO, BytesIO, TextIOWrapper
 
-from flask import (
-    render_template,
-    request,
-    redirect,
-    send_file,
-    send_from_directory,
-    url_for,
-)
-from werkzeug.utils import secure_filename
+from flask import render_template, request
 
-from app import create_app
-
-# import apg  ## Use when debuggging and copy apg.py to root repo dir
-import audio_program_generator.apg as apg
+from . import create_app
+from .aws import create_audio_mix
 
 app = create_app()
 
 
 @app.route("/", methods=("GET", "POST"))
 def setvals():
-
     # All requests other than POST (i.e. GET) are re-shown the input form.
     if not request.method == "POST":
         return render_template("public/setvals.html")
 
     # Local handles for request object (type: Werkzeug FileStorage)
     req_phrase_file_obj = request.files["phrase_file"]
-    req_sound_file_obj = request.files["sound_file"]
+    req_sound_file_obj = request.files.get("sound_file", None)
 
     # Verify phrase_file type is allowed; if not, redirect to input form.
     if (
@@ -37,27 +26,44 @@ def setvals():
     ):
         return render_template("public/setvals.html")
 
-    # Instantiate AudioProgramGenerator object with params passed
-    # in from HTML form
-    slow = True if request.form.get("slow") == "on" else False
-    attenuation = request.form.get("attenuation")
-    kwargs = dict(slow=slow, attenuation=attenuation)
-    phr = StringIO(req_phrase_file_obj.read().decode())
-    snd = None if req_sound_file_obj.filename == '' else BytesIO(req_sound_file_obj.read())
-    A = apg.AudioProgramGenerator(
-        phr,
-        snd,
-        **kwargs,
+    # Verify sound_file type is allowed; if not, redirect to input form.
+    if req_sound_file_obj and (
+        Path(req_sound_file_obj.filename).suffix
+        not in app.config["SOUNDFILE_EXTENSIONS"]
+    ):
+        return render_template("public/setvals.html")
+
+    kwargs = dict(
+        attenuation=int(request.form.get("attenuation", 0))
     )
 
-    # Generate mixed sound file from speech, then serve in browser
-    result = A.invoke()
-    return send_file(
-        result,
-        mimetype="audio/mpeg",
-        attachment_filename=str(Path(req_phrase_file_obj.filename)),
-        as_attachment=True,
-    )
+    response = create_audio_mix(
+        req_phrase_file_obj,
+        req_sound_file_obj,
+        **kwargs)
+
+    file = response.get("result_file")
+    exception = response.get("exception")
+    status_code = response.get("status_code")
+    message = response.get("message")
+
+    if status_code == 200:
+        logging.debug(
+            f"AWS generated mix file: {file}")
+    # sometimes lambda returns something app developer did not define,
+    # e.g. {'message': 'Endpoint request timed out'}
+    elif message:
+        logging.error(
+            ("AWS failed to generate mix file, "
+             f"message returned: {message}"))
+    else:
+        logging.error(
+            ("AWS failed to generate mix file, "
+             f"exception: {exception}"))
+
+    return render_template("public/setvals.html",
+                           file=file,
+                           exception=exception)
 
 
 def shutdown_server():
