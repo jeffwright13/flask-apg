@@ -11,8 +11,7 @@ load_dotenv()
 DEBUG = os.getenv("DEBUG", False)
 
 def create_app():
-    print(__name__)
-    app = Flask("bunny")
+    app = Flask(__name__)
     app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024
     app.config["PHRASEFILE_EXTENSIONS"] = {".txt"}
     app.config["SOUNDFILE_EXTENSIONS"] = {".wav"}
