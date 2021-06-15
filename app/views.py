@@ -11,7 +11,7 @@ from flask import (
 )
 from werkzeug.utils import secure_filename
 
-from app import create_app
+#from app import create_app
 
 # import apg  ## Use when debuggging and copy apg.py to root repo dir
 import audio_program_generator.apg as apg
