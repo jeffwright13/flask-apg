@@ -11,12 +11,12 @@ load_dotenv()
 DEBUG = os.getenv("DEBUG", False)
 
 def create_app():
-    app = Flask(__name__)
-    app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024
-    app.config["PHRASEFILE_EXTENSIONS"] = {".txt"}
-    app.config["SOUNDFILE_EXTENSIONS"] = {".wav"}
-    app.config["DEBUG"] = DEBUG
-    return app
+    flask = Flask(__name__)
+    flask.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024
+    flask.config["PHRASEFILE_EXTENSIONS"] = {".txt"}
+    flask.config["SOUNDFILE_EXTENSIONS"] = {".wav"}
+    flask.config["DEBUG"] = DEBUG
+    return flask
 
 
 logging_settings = dict(
