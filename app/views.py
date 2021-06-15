@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 from io import StringIO, BytesIO, TextIOWrapper
 
@@ -21,7 +22,6 @@ app = create_app()
 
 @app.route("/", methods=("GET", "POST"))
 def setvals():
-
     # All requests other than POST (i.e. GET) are re-shown the input form.
     if not request.method == "POST":
         return render_template("public/setvals.html")
@@ -58,7 +58,6 @@ def setvals():
         attachment_filename=str(Path(req_phrase_file_obj.filename)),
         as_attachment=True,
     )
-
 
 def shutdown_server():
     func = request.environ.get("werkzeug.server.shutdown")
