@@ -21,6 +21,8 @@ app = create_app()
 
 @app.route("/", methods=("GET", "POST"))
 def setvals():
+    print("Hello from setvals!")
+    print(request.method)
 
     # All requests other than POST (i.e. GET) are re-shown the input form.
     if not request.method == "POST":
