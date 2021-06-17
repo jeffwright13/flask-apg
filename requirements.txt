@@ -1,4 +1,4 @@
-audio_program_generator==1.6.1
+audio_program_generator==1.6.2
 certifi==2021.5.30
 chardet==4.0.0
 click==8.0.1
