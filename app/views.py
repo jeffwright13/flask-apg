@@ -55,7 +55,7 @@ def setvals():
     return send_file(
         result,
         mimetype="audio/mpeg",
-        attachment_filename=str(Path(req_phrase_file_obj.filename)),
+        download_name=str(Path(req_phrase_file_obj.filename)),
         as_attachment=True,
     )
 
