@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 from io import StringIO, BytesIO, TextIOWrapper
 
@@ -57,7 +58,6 @@ def setvals():
         attachment_filename=str(Path(req_phrase_file_obj.filename)),
         as_attachment=True,
     )
-
 
 def shutdown_server():
     func = request.environ.get("werkzeug.server.shutdown")
