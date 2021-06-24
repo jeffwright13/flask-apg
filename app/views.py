@@ -39,9 +39,10 @@ def setvals():
 
     # Instantiate AudioProgramGenerator object with params passed
     # in from HTML form
-    slow = True if request.form.get("slow") == "on" else False
     attenuation = request.form.get("attenuation")
-    kwargs = dict(slow=slow, attenuation=attenuation)
+    slow = True if request.form.get("slow") == "on" else False
+    accent = request.form.get("accent")
+    kwargs = dict(slow=slow, attenuation=attenuation, tld=accent)
     phr = StringIO(req_phrase_file_obj.read().decode())
     snd = None if req_sound_file_obj.filename == '' else BytesIO(req_sound_file_obj.read())
     A = apg.AudioProgramGenerator(
