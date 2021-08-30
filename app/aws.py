@@ -3,7 +3,6 @@ from base64 import b64decode
 import os
 
 import boto3
-from werkzeug.datastructures import FileStorage
 import requests
 
 FILE_URL = 'https://{bucket}.s3.us-east-2.amazonaws.com/{filename}'
