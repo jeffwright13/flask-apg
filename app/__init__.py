@@ -30,3 +30,5 @@ if DEBUG:
     logging_settings["stream"] = sys.stdout
 
 logging.basicConfig(**logging_settings)
+
+app = create_app()

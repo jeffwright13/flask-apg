@@ -6,10 +6,8 @@ from flask import (
     request,
 )
 
-from app import create_app
+from app import app
 from app.tasks import create_audio_mix
-
-app = create_app()
 
 
 @app.route("/", methods=("GET", "POST"))
