@@ -1,25 +1,32 @@
 import logging
 from pathlib import Path
 import os
+import sys
 
 from flask import Flask
 from dotenv import load_dotenv
 
-# breakpoint()
-
-
 load_dotenv()
 
-app = Flask(__name__)
+DEBUG = os.getenv("DEBUG", False)
 
-from app import views, admin_views
+def create_app():
+    flask = Flask(__name__)
+    flask.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024
+    flask.config["PHRASEFILE_EXTENSIONS"] = {".txt"}
+    flask.config["SOUNDFILE_EXTENSIONS"] = {".wav"}
+    flask.config["DEBUG"] = DEBUG
+    return flask
 
-app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024
-app.config["PHRASEFILE_EXTENSIONS"] = {".txt"}
-app.config["SOUNDFILE_EXTENSIONS"] = {".wav"}
 
-logging.basicConfig(
+logging_settings = dict(
     filename="flask.log",
     level=logging.WARN,
-    format=f"%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s",
+    format="%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s",
 )
+if DEBUG:
+    # in debugging (local dev) mode, send logs to standard output
+    del logging_settings["filename"]
+    logging_settings["stream"] = sys.stdout
+
+logging.basicConfig(**logging_settings)

@@ -1,22 +1,26 @@
 from base64 import b64encode
 from pathlib import Path
 
-from flask import render_template, request
+from flask import (
+    render_template,
+    request,
+)
 
-from app import app
-
+from app import create_app
 from app.tasks import create_audio_mix
+
+app = create_app()
 
 
 @app.route("/", methods=("GET", "POST"))
 def setvals():
     # All requests other than POST (i.e. GET) are re-shown the input form.
     if not request.method == "POST":
-        return render_template("public/setvals2.html")
+        return render_template("public/setvals.html")
 
     # Local handles for request object (type: Werkzeug FileStorage)
     req_phrase_file_obj = request.files["phrase_file"]
-    req_sound_file_obj = request.files.get("sound_file", None)
+    req_sound_file_obj = request.files["sound_file"]
 
     # Verify phrase_file type is allowed; if not, redirect to input form.
     if (
@@ -25,16 +29,12 @@ def setvals():
     ):
         return render_template("public/setvals.html")
 
-    # Verify sound_file type is allowed; if not, redirect to input form.
-    if req_sound_file_obj and (
-        Path(req_sound_file_obj.filename).suffix
-        not in app.config["SOUNDFILE_EXTENSIONS"]
-    ):
-        return render_template("public/setvals.html")
-
-    kwargs = dict(
-        attenuation=int(request.form.get("attenuation", 0))
-    )
+    # Instantiate AudioProgramGenerator object with params passed
+    # in from HTML form
+    attenuation = request.form.get("attenuation")
+    slow = True if request.form.get("slow") == "on" else False
+    accent = request.form.get("accent")
+    kwargs = dict(slow=slow, attenuation=attenuation, tld=accent)
 
     req_phrase_file_content_encoded = b64encode(
         req_phrase_file_obj.read())
@@ -47,7 +47,6 @@ def setvals():
         req_sound_file_obj.filename,
         req_sound_file_content_encoded,
         **kwargs)
-
 
     return render_template("public/setvals.html",
                            msg="Your file is processing")

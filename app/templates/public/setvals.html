@@ -1,32 +1,64 @@
 {% extends "public/templates/public_template.html" %}
-{% import "macros/input_macros.html" as im %}
 
-{% block title %}Setvals{% endblock %}
+{% block title %}Audio Program Generator{% endblock %}
 {% block main %}
-
 
 <div class="container">
   <div class="row">
     <div class="col">
-      {% if file %}
-      <p>Here you go, your mix is ready! Listen to it here:</p>
-        <!-- https://stackoverflow.com/a/58415830 -->
-        <audio controls controlsList="nodownload">
-          <source src="data:audio/wav;base64,{{file}}">
-          Your browser does not support the audio element.
-        </audio>
 
-      {% elif exception %}
-        <p>Something went wrong while processing this request: <span color="red">{{ exception }}</span></p>
+      <form action="/" method="POST" enctype="multipart/form-data">
 
-      {% else %}
-        <form action="{{ url_for("setvals")}}" method="POST" enctype="multipart/form-data">
-          {{ im.input_required(label="Please select your input phrase file (required; type = .txt; max_size = 50MB)", type="file", id="phrase_file", name="phrase_file" ) }}
-          {{ im.input(label="Please select sound file to mix in (required if mix enabled; type = .wav; max_size = 50MB)", type="file", id="sound_file", name="sound_file") }}
-          {{ im.input(label="Attenuation applied to sound file (dB)", type="number", id="attenuation", name="attenuation", placeholder="Enter attenuation (dB)", value=10) }}
-          <button type="submit">Submit</button>
-        </form>
-      {% endif %}
+        <div class="form-group">
+          <label>
+            <b>Please select your input phrase file (required)</b>
+          </label>
+          <input type="file" class="form-control" id="phrase_file" name="phrase_file" accept=".txt" required />
+        </div>
+
+        <div class="form-group">
+          <label>
+            <b>Please select sound file to mix in (optional; recommended max_size = 20MB)</b>
+          </label>
+          <input type="file" class="form-control" id="sound_file" name="sound_file" accept=".wav" />
+          <span class="slider round"></span>
+        </div>
+
+        <div class="form-group">
+          <label>
+            <b>Attenuation applied to sound file (dB)</b>
+          </label>
+          <input type="number" class="form-control" id="attenuation" name="attenuation" placeholder="Enter attenuation (dB)" value="10" />
+          <span class="slider round"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="switch">
+            <b>Slowed Speech</b>
+            <input type="checkbox" class="form-control" id="slow" name="slow" />
+            <span class="slider round"></span>
+          </label>
+        </div>
+        <div class="form-group">
+            <b>Accent (TLD)</b>
+            <select class="form-select" aria-label="Default select example" id="accent" name="accent">
+              <option selected>Open this select menu</option>
+              <option value="com.au">Aussie</option>
+              <option value="co.uk">Brit</option>
+              <option value="com">Yank</option>
+              <option value="ca">Canuck</option>
+              <option value="co.in">Indian</option>
+              <option value="ie">Paddy</option>
+              <option value="co.za">Afrikaaner</option>
+            </select>
+          </div>
+
+
+        <button type="submit"><b>Submit</b></button>
+
+      </form>
+
+
     </div>
   </div>
 </div>
