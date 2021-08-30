@@ -18,6 +18,7 @@ def _upload_to_s3(filename, content, bucket=AWS_S3_BUCKET):
 
     Super helpfuL: https://stackoverflow.com/a/60239208
     """
+    filename = re.sub(r"[^-_0-9a-z.]", r"", filename)
     s3_resource = boto3.resource(
         's3',
         aws_access_key_id=AWS_ACCESS_KEY_ID,
@@ -72,10 +73,7 @@ def create_audio_mix(
 
     try:
         outputfile_decoded = BytesIO(b64decode(response["result_file"]))
-        result_filename = re.sub(
-            r"[^-_0-9a-z.]", r"",
-            f"{req_phrase_filename}_{req_sound_filename}_result.wav".lower()
-        )
+        result_filename = f"{req_phrase_filename}_{req_sound_filename}_result.wav".lower()
         result_file_path = _upload_to_s3(result_filename, outputfile_decoded)
         exception = None
     except Exception as exc:
