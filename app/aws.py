@@ -1,3 +1,4 @@
+from base64 import b64decode
 import os
 
 import boto3
@@ -11,7 +12,7 @@ AWS_S3_BUCKET = os.getenv("AWS_S3_BUCKET")
 AWS_GATEWAY_URL = os.getenv("AWS_GATEWAY_URL")
 
 
-def _upload_to_s3(file: FileStorage, bucket=AWS_S3_BUCKET) -> str:
+def _upload_to_s3(filename, content, bucket=AWS_S3_BUCKET):
     """Upload a file object to S3 returning its public URL
 
     Super helpfuL: https://stackoverflow.com/a/60239208
@@ -23,16 +24,17 @@ def _upload_to_s3(file: FileStorage, bucket=AWS_S3_BUCKET) -> str:
 
     bucket = s3_resource.Bucket(bucket)
 
-    filename = file.filename
-    bucket.Object(filename).put(Body=file.read(),
+    bucket.Object(filename).put(Body=content,
                                 ACL='public-read')
 
     return FILE_URL.format(bucket=bucket.name,
                            filename=filename)
 
 
-def create_audio_mix(req_phrase_file_obj,
-                     req_sound_file_obj,
+def create_audio_mix(req_phrase_filename,
+                     req_phrase_file_content_encoded,
+                     req_sound_filename,
+                     req_sound_file_content_encoded,
                      **kwargs):
     """Upload files to S3 and invoke apg in AWS Lambda
 
@@ -40,13 +42,26 @@ def create_audio_mix(req_phrase_file_obj,
     the same or a different S3 bucket, then check this
     cache here first for quick retrieval
     """
-    phrase_file_s3_path = _upload_to_s3(req_phrase_file_obj)
-    payload = dict(phrase_file=phrase_file_s3_path)
+    req_phrase_file_content_decoded = b64decode(
+        req_phrase_file_content_encoded)
+    req_sound_file_content_decoded = b64decode(
+        req_sound_file_content_encoded
+    )
 
-    if req_sound_file_obj:
-        sound_file_s3_path = _upload_to_s3(req_sound_file_obj)
-        payload.update(dict(sound_file=sound_file_s3_path))
+    phrase_file_s3_path = _upload_to_s3(
+        req_phrase_filename,
+        req_phrase_file_content_decoded
+    )
 
+    sound_file_s3_path = _upload_to_s3(
+        req_sound_filename,
+        req_sound_file_content_decoded
+    )
+
+    payload = {
+        "phrase_file": phrase_file_s3_path,
+        "sound_file": sound_file_s3_path
+    }
     payload.update(kwargs)
 
     resp = requests.post(AWS_GATEWAY_URL, json=payload)

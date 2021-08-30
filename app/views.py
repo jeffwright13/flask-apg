@@ -1,17 +1,11 @@
-import logging
+from base64 import b64encode
 from pathlib import Path
 
 from flask import render_template, request
 
 from app import app
-from .aws import create_audio_mix
 
-from app.tasks import add_together
-
-@app.route("/ab")
-def ab():
-    add_together.delay(23, 42)
-    return render_template("public/tasks.html")
+from app.tasks import create_audio_mix
 
 
 @app.route("/", methods=("GET", "POST"))
@@ -42,33 +36,21 @@ def setvals():
         attenuation=int(request.form.get("attenuation", 0))
     )
 
-    response = create_audio_mix(
-        req_phrase_file_obj,
-        req_sound_file_obj,
+    req_phrase_file_content_encoded = b64encode(
+        req_phrase_file_obj.read())
+    req_sound_file_content_encoded = b64encode(
+        req_sound_file_obj.read())
+
+    create_audio_mix.delay(
+        req_phrase_file_obj.filename,
+        req_phrase_file_content_encoded,
+        req_sound_file_obj.filename,
+        req_sound_file_content_encoded,
         **kwargs)
 
-    file = response.get("result_file")
-    exception = response.get("exception")
-    status_code = response.get("status_code")
-    message = response.get("message")
-
-    if status_code == 200:
-        logging.debug(
-            f"AWS generated mix file: {file}")
-    # sometimes lambda returns something app developer did not define,
-    # e.g. {'message': 'Endpoint request timed out'}
-    elif message:
-        logging.error(
-            ("AWS failed to generate mix file, "
-             f"message returned: {message}"))
-    else:
-        logging.error(
-            ("AWS failed to generate mix file, "
-             f"exception: {exception}"))
 
     return render_template("public/setvals.html",
-                           file=file,
-                           exception=exception)
+                           msg="Your file is processing")
 
 
 def shutdown_server():
