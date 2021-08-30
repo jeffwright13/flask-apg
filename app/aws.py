@@ -73,7 +73,7 @@ def create_audio_mix(
     try:
         outputfile_decoded = BytesIO(b64decode(response["result_file"]))
         result_filename = re.sub(
-            r"[^-_0-9a-z]", r"",
+            r"[^-_0-9a-z.]", r"",
             f"{req_phrase_filename}_{req_sound_filename}_result.wav".lower()
         )
         result_file_path = _upload_to_s3(result_filename, outputfile_decoded)
