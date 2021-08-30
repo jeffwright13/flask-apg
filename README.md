@@ -19,5 +19,12 @@ alpha+ (meaning, it runs locally on my Macbook Pro w/ Catalina 10.15.7,
 * point browser at http://127.0.0.1:5000/setvals
 * fill out the form, submit, and wait for browser to serve up your freshly mixed mp3 file :-)
 
+# Process files in AWS using a task queue
+
+* Checkout the `celery` branch (which branches off `lambda2`)
+* Set the AWS\* env variables and install the additional requirements
+* Run Celery: `celery -A app.tasks.celery worker --loglevel=info`
+* To monitor tasks, run Flower: `celery -A app.tasks.celery flower`
+
 # Author:
 Jeff Wright <jeff.washcloth@gmail.com>
