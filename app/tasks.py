@@ -1,4 +1,3 @@
-import logging
 import os
 
 from dotenv import load_dotenv
@@ -6,6 +5,7 @@ from dotenv import load_dotenv
 from app import app
 from app.celery import make_celery
 from app.aws import create_audio_mix as _create_audio_mix
+from app.results.db import create_db_and_tables, insert_file, update_file_with_result
 
 load_dotenv()
 
@@ -13,29 +13,37 @@ app.config.update(
     CELERY_BROKER_URL=os.environ["CELERY_BROKER_URL"],
 )
 celery = make_celery(app)
+create_db_and_tables()
 
 
 @celery.task()
-def create_audio_mix(*args, **kwargs):
-    response = _create_audio_mix(*args, **kwargs)
+def create_audio_mix(
+    req_phrase_filename,
+    req_phrase_file_content_encoded,
+    req_sound_filename,
+    req_sound_file_content_encoded,
+    **kwargs
+):
+    # keep state in db
+    file = insert_file(
+        req_phrase_filename,
+        req_sound_filename,
+        kwargs.get("attenuation", 10)
+    )
 
-    file = response.get("result_file")
-    exception = response.get("exception")
-    status_code = response.get("status_code")
-    message = response.get("message")
+    # this takes long
+    phrase_file_path, sound_file_path, result_file_path, exception = _create_audio_mix(
+        req_phrase_filename,
+        req_phrase_file_content_encoded,
+        req_sound_filename,
+        req_sound_file_content_encoded,
+        **kwargs
+    )
 
-    if status_code == 200:
-        logging.debug(
-            f"AWS generated mix file: {file}")
-    # sometimes lambda returns something app developer did not define,
-    # e.g. {'message': 'Endpoint request timed out'}
-    elif message:
-        logging.error(
-            ("AWS failed to generate mix file, "
-             f"message returned: {message}"))
-    else:
-        logging.error(
-            ("AWS failed to generate mix file, "
-             f"exception: {exception}"))
-
-    # TODO insert into DB result table
+    # update db with results
+    update_file_with_result(
+        file.id,
+        phrase_file_path,
+        sound_file_path,
+        result_file_path,
+        exception)

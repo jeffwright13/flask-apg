@@ -1,3 +1,4 @@
+from io import BytesIO
 from base64 import b64decode
 import os
 
@@ -31,11 +32,13 @@ def _upload_to_s3(filename, content, bucket=AWS_S3_BUCKET):
                            filename=filename)
 
 
-def create_audio_mix(req_phrase_filename,
-                     req_phrase_file_content_encoded,
-                     req_sound_filename,
-                     req_sound_file_content_encoded,
-                     **kwargs):
+def create_audio_mix(
+    req_phrase_filename,
+    req_phrase_file_content_encoded,
+    req_sound_filename,
+    req_sound_file_content_encoded,
+    **kwargs
+):
     """Upload files to S3 and invoke apg in AWS Lambda
 
     TODO: have the lambda function store the result file in
@@ -48,21 +51,35 @@ def create_audio_mix(req_phrase_filename,
         req_sound_file_content_encoded
     )
 
-    phrase_file_s3_path = _upload_to_s3(
+    phrase_file_path = _upload_to_s3(
         req_phrase_filename,
         req_phrase_file_content_decoded
     )
 
-    sound_file_s3_path = _upload_to_s3(
+    sound_file_path = _upload_to_s3(
         req_sound_filename,
         req_sound_file_content_decoded
     )
 
     payload = {
-        "phrase_file": phrase_file_s3_path,
-        "sound_file": sound_file_s3_path
+        "phrase_file": phrase_file_path,
+        "sound_file": sound_file_path
     }
     payload.update(kwargs)
 
     resp = requests.post(AWS_GATEWAY_URL, json=payload)
-    return resp.json()
+    response = resp.json()
+
+    try:
+        outputfile_decoded = BytesIO(b64decode(response["result_file"]))
+        result_file_path = _upload_to_s3(
+            f"{req_phrase_filename}_{req_sound_filename}_result.wav",
+            outputfile_decoded
+        )
+        exception = None
+    except Exception as exc:
+        print("ERROR", exc)
+        result_file_path = None
+        exception = str(exc)
+
+    return phrase_file_path, sound_file_path, result_file_path, exception
