@@ -6,7 +6,7 @@ from app import app
 from app.celery import make_celery
 from app.aws import create_audio_mix as _create_audio_mix
 from app.results.db import (create_db_and_tables,
-                            insert_file,
+                            upsert_file,
                             update_file_with_result)
 
 load_dotenv()
@@ -27,7 +27,7 @@ def create_audio_mix(
     **kwargs
 ):
     # keep state in db
-    file = insert_file(
+    file = upsert_file(
         req_phrase_filename, req_sound_filename, kwargs.get("attenuation", 10)
     )
 

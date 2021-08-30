@@ -10,6 +10,7 @@ class File(SQLModel, table=True):
     sound_file_name: str
     attenuation: int
     added: datetime
+    updated: datetime
     phrase_file_path: Optional[str] = None
     sound_file_path: Optional[str] = None
     result_file_path: Optional[str] = None
