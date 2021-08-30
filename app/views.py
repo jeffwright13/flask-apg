@@ -6,6 +6,13 @@ from flask import render_template, request
 from app import app
 from .aws import create_audio_mix
 
+from app.tasks import add_together
+
+@app.route("/ab")
+def ab():
+    add_together.delay(23, 42)
+    return render_template("public/tasks.html")
+
 
 @app.route("/", methods=("GET", "POST"))
 def setvals():

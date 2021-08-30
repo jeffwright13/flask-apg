@@ -18,3 +18,5 @@ six==1.16.0
 tqdm==4.61.0
 urllib3==1.26.5
 Werkzeug==2.0.1
+celery==5.1.2
+redis==3.5.3
