@@ -23,7 +23,7 @@ app = create_app()
 @app.route("/", methods=("GET", "POST"))
 def setvals():
     # All requests other than POST (i.e. GET) are re-shown the input form.
-    if not request.method == "POST":
+    if request.method != "POST":
         return render_template("public/setvals.html")
 
     # Local handles for request object (type: Werkzeug FileStorage)
@@ -40,7 +40,7 @@ def setvals():
     # Instantiate AudioProgramGenerator object with params passed
     # in from HTML form
     attenuation = request.form.get("attenuation")
-    slow = True if request.form.get("slow") == "on" else False
+    slow = request.form.get("slow") == "on"
     accent = request.form.get("accent")
     kwargs = dict(slow=slow, attenuation=attenuation, tld=accent)
     phr = StringIO(req_phrase_file_obj.read().decode())
