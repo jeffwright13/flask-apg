@@ -11,7 +11,7 @@
 
         <div class="form-group">
           <label>
-            <b>Please select your input phrase file (required)</b>
+            <b>Please select your input phrase or book file (required)</b>
           </label>
           <input type="file" class="form-control" id="phrase_file" name="phrase_file" accept=".txt" required />
         </div>
@@ -30,19 +30,22 @@
           </label>
           <input type="number" class="form-control" id="attenuation" name="attenuation" placeholder="Enter attenuation (dB)" value="10" />
           <span class="slider round"></span>
-        </div>
-
-        <div class="form-group">
           <label class="switch">
-            <b>Slowed Speech</b>
+            <b>Slow Speech</b>
             <input type="checkbox" class="form-control" id="slow" name="slow" />
             <span class="slider round"></span>
           </label>
+          <label class="switch">
+            <b>Book Mode</b>
+            <input type="checkbox" class="form-control" id="book_mode" name="book_mode" />
+            <span class="slider round"></span>
+          </label>
         </div>
+
         <div class="form-group">
             <b>Accent (TLD)</b>
             <select class="form-select" aria-label="Default select example" id="accent" name="accent">
-              <option selected>Open this select menu</option>
+              <option selected>Select</option>
               <option value="com.au">Aussie</option>
               <option value="co.uk">Brit</option>
               <option value="com">Yank</option>
