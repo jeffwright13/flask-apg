@@ -1,5 +1,4 @@
 import logging
-from pathlib import Path
 import os
 import sys
 
@@ -9,6 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 DEBUG = os.getenv("DEBUG", False)
+
 
 def create_app():
     flask = Flask(__name__)
