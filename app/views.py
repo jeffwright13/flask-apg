@@ -1,17 +1,10 @@
-import logging
 from pathlib import Path
-from io import StringIO, BytesIO, TextIOWrapper
-
+from io import StringIO, BytesIO
 from flask import (
     render_template,
     request,
-    redirect,
     send_file,
-    send_from_directory,
-    url_for,
 )
-from werkzeug.utils import secure_filename
-
 from app import create_app
 
 # import apg  ## Use when debuggging and copy apg.py to root repo dir
@@ -41,11 +34,20 @@ def setvals():
     # in from HTML form
     attenuation = request.form.get("attenuation")
     slow = request.form.get("slow") == "on"
-    accent = request.form.get("accent")
+    accent = (
+        "com"
+        if request.form.get("accent")
+        not in ("com.au", "ca", "ie", "co.in", "co.uk", "com", "co.za")
+        else request.form.get("accent")
+    )
     book_mode = request.form.get("book_mode")
     kwargs = dict(slow=slow, attenuation=attenuation, tld=accent, book_mode=book_mode)
     phr = StringIO(req_phrase_file_obj.read().decode())
-    snd = None if req_sound_file_obj.filename == '' else BytesIO(req_sound_file_obj.read())
+    snd = (
+        None
+        if req_sound_file_obj.filename == ""
+        else BytesIO(req_sound_file_obj.read())
+    )
     A = apg.AudioProgramGenerator(
         phr,
         snd,
@@ -60,6 +62,7 @@ def setvals():
         download_name=str(Path(req_phrase_file_obj.filename)),
         as_attachment=True,
     )
+
 
 def shutdown_server():
     func = request.environ.get("werkzeug.server.shutdown")
